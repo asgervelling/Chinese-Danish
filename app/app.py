@@ -1,125 +1,67 @@
 from flask import Flask, request, render_template, url_for, redirect
 from forms import BasicForm
 
-
+import sqlite
+from forms import *
 
 import os
 
 app = Flask(__name__)
-
-app.config.from_object(os.environ['APP_SETTINGS'])
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
-
-
-
+app.secret_key = 'this_is_secret'
 
 @app.route('/')
 def index():
     return render_template('index.html')
-    
-questions = {
-    '2 + 2 = __': '4',
-    'Hvem er præsident i USA?': 'Donald Trump'
-}
-
-exercises = {
-    # type of exercise: {language to language: {specific exercise: {correct answers: list[]}}}
-    'enter_the_answer': {
-        'da-zh': {
-            'Hvordan siger man "kaffe" på kinesisk?': ['咖啡', 'kafei', 'ka fei'],
-            'Hvordan siger man "at løbe" på kinesisk?': ['跑步', 'paobu', 'pao bu']
-        },
-        'zh-da': {
-            '用丹麦语怎么说 咖啡？': ['kaffe', 'Kaffe'],
-            '用丹麦语怎么说 跑步？': ['at løbe', 'løbe']
-        }
-    },
-    'multiple_choice': {
-        'da-zh': {
-            '小名的[ven]要去超市买东西': ['朋友', 'pengyou', 'peng you'],
-            '她喜欢看[fjernsyn]': ['电视', 'dianshi', 'dian shi']
-        },
-        'zh-da':
-        {
-            'Christians [朋友] tager i supermarkedet for at købe ind': ['ven', 'Ven']
-        }
-    }
-}
 
 
-
-
-
-@app.route('/exercises/<string:type_of_exercise>/<string:lang>/<int:question_id>', methods=['GET', 'POST'])
-def show_exercise(type_of_exercise, lang, question_id):
+@app.route('/exercises/<int:question_id>', methods=['GET', 'POST'])
+def show_exercise(question_id):
     form = BasicForm()
-    question = ''
-    answer = ''
-    index = 0
-    for q, a in exercises['multiple_choice']['da-zh'].items():
-        for answer in a:
-            print(answer)
-        if index == int(question_id):
-            question = q
-            print('QUESTION: ', question)
-            break
-        index += 1
-    e = exercises[type_of_exercise][lang].items()
-    if request.method == 'POST':
-        answer = form.basic_input.data
-        print('The answer is ', answer)
-    for a, b in e:
-        print(b)
-    print('Question: ', question)
-
-    
-
-    correct = False
-    def correct_answer():
-        for q, a in exercises[type_of_exercise][lang].items():
+    multiple_choice_form = MultipleChoiceForm()
+    conn = sqlite.create_connection('test.db')
+    answer = form.basic_input.data
             
-        
-            print('{{')
-            print(q)
-            print(a)
-            if answer in a:
-                correct = True
-                print('it is trueeeeeeeeeeeeee')
+    question = sqlite.get_question_text(conn, question_id)
+    ex_type = sqlite.get_exercise_type(conn, question_id)
+
+    answer_0 = sqlite.get_answer(conn, question_id, 1).casefold()
+    answer_1 = sqlite.get_answer(conn, question_id, 2).casefold()
+    answer_2 = sqlite.get_answer(conn, question_id, 3).casefold()
+    answers = [answer_0, answer_1, answer_2]
+
+    if ex_type == 'MULTIPLE_CHOICE' and request.method == 'GET':
+        correct_answer = answer_0
+        multiple_choice_form.choices = answers
+        return render_template('multiple_choice.html', question=question,
+                                                       multiple_choice_form=multiple_choice_form)
+    if request.method == 'POST':
+        if ex_type == 'MULTIPLE_CHOICE':
+            correct_answer = answer_0
+            if 'a_0' in request.form:
+                print("it is in it yes")
+            button_input = request.form.to_dict()
+            print(button_input.keys())
+            print(correct_answer)
+            if correct_answer in button_input:
+                return redirect(url_for('show_exercise', question_id=question_id+1))
             else:
-                print('it is not true. answer:')
-                print(answer)
-    
-    correct_answer()     
-    
-    if correct == True:
-        print('correct answer')
-        next_question = 'exercises/' + type_of_exercise + '/' \
-                                      + lang + '/' + str(question_id)
-        print(next_question)
-        return redirect(next_question)
-        print('Question ID == ', question_id)
+                return redirect(url_for('show_exercise', question_id=question_id))
+        # User just typed something into the text field
+        text_input = form.basic_input.data
+        print('text input: ', text_input, answers)
+        if text_input in answers:
+            return redirect(url_for('show_exercise', question_id=question_id+1))
         
-        return redirect(url_for('show_exercise', type_of_exercise=type_of_exercise,
-                                               lang=lang,
-                                               question_id=1))
-    else:
-        print('not correct\n_________________________')
-        
+
     
     return render_template('level.html', form=form, question=question)
     
-    # question to display
-    
-    
-    
 
-    return 'hi'
 
 
 @app.route('/levels/<int:lvl>', methods=['GET', 'POST'])
 def show_level(lvl):
-    form = BasicForm()
+    form = forms.BasicForm()
     if lvl >= len(questions):
         return redirect('/HTTP_error/404')
     question = list(questions.keys())[lvl]

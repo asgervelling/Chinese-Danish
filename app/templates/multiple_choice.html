@@ -1,0 +1,23 @@
+{% extends 'layout.html' %}
+{% block content %}
+
+<form action="" method="post" name="multiple_choice">
+    <!-- Row -->
+    <div class="container">
+        <div class="column">
+                <h1 class="title">
+                {{ question }}<br>
+                </h1>
+                
+            
+        </div>
+    </div>
+
+    <!-- Row -->
+    <div class="container">
+        <input class="button" type="submit" name="{{ multiple_choice_form.choices[0] }}" value="{{ multiple_choice_form.choices[0] }}">
+        <input class="button" type="submit" name="{{ multiple_choice_form.choices[1] }}" value="{{ multiple_choice_form.choices[1] }}">
+        <input class="button" type="submit" name="{{ multiple_choice_form.choices[2] }}" value="{{ multiple_choice_form.choices[2] }}">
+    </div>
+</form>
+{% endblock %}
