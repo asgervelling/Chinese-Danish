@@ -1,5 +1,6 @@
 from flask import Flask, request, render_template, url_for, redirect
 from forms import BasicForm
+import random
 
 import sqlite
 from forms import *
@@ -29,6 +30,11 @@ def show_exercise(question_id):
     answer_2 = sqlite.get_answer(conn, question_id, 3).casefold()
     answers = [answer_0, answer_1, answer_2]
 
+    # go to a random exercise if you get this one right
+    next_exercise_id = random.randint(0, sqlite.get_max_id(conn))
+    if next_exercise_id == question_id:
+        next_exercise_id = random.randint(0, sqlite.get_max_id(conn))
+
     if ex_type == 'MULTIPLE_CHOICE' and request.method == 'GET':
         correct_answer = answer_0
         multiple_choice_form.choices = answers
@@ -37,20 +43,17 @@ def show_exercise(question_id):
     if request.method == 'POST':
         if ex_type == 'MULTIPLE_CHOICE':
             correct_answer = answer_0
-            if 'a_0' in request.form:
-                print("it is in it yes")
             button_input = request.form.to_dict()
-            print(button_input.keys())
-            print(correct_answer)
+            
             if correct_answer in button_input:
-                return redirect(url_for('show_exercise', question_id=question_id+1))
+                return redirect(url_for('show_exercise', question_id=next_exercise_id))
             else:
                 return redirect(url_for('show_exercise', question_id=question_id))
         # User just typed something into the text field
         text_input = form.basic_input.data
         print('text input: ', text_input, answers)
         if text_input in answers:
-            return redirect(url_for('show_exercise', question_id=question_id+1))
+            return redirect(url_for('show_exercise', question_id=next_exercise_id))
         
 
     
@@ -79,9 +82,9 @@ def not_found(error):
 @app.route('/app', methods=['GET','POST'])
 def app_page():
     if request.method == 'GET':
-        return redirect('/levels/0')
+        return redirect('/exercises/0')
     else:
-        return 'hello'
+        return 'post request on /app'
 
 @app.route('/register')
 def register():

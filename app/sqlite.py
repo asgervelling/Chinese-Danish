@@ -41,6 +41,13 @@ def print_all_answers(conn):
         print('Answer 0\t\t\t\t', row[1])
         print('Answer 1\t\t\t\t', row[2])
         print('Answer 2\t\t\t\t', row[3])
+
+def get_question_records(conn):
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM QUESTION")
+    records = cur.fetchall()
+
+    return records
    
 def get_question_text(conn, id):
     cur = conn.cursor()
@@ -62,6 +69,15 @@ def get_exercise_type(conn, q_id):
     records = cur.fetchall()
 
     return records[q_id][2]
+
+def get_max_id(conn):
+    cur = conn.cursor()
+    cur.execute("SELECT MAX(ID) FROM QUESTION")
+    
+    records = cur.fetchone()
+    max_id = records[0]
+
+    return max_id
 
 def correct_answer(conn, q_id, answer:str):
     # answers = [1, 2, 3]
