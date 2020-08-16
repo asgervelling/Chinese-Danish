@@ -79,19 +79,3 @@ def get_max_id(conn):
 
     return max_id
 
-def correct_answer(conn, q_id, answer:str):
-    # answers = [1, 2, 3]
-    for i in range(1, 4):
-        accepted_answer = get_answer(conn, q_id, i)
-        print('accepted answer: ', accepted_answer)
-        print('your answer: ', answer)
-        if answer == accepted_answer:
-            print('That is correct')
-            return True
-    return False
-
-conn = create_connection('test.db')
-with conn:
-    print_all_questions(conn)
-    print(get_question_text(conn, 3))
-    correct_answer(conn, 3, 'paobu')
