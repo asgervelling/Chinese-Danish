@@ -70,6 +70,13 @@ def get_exercise_type(conn, q_id):
 
     return records[q_id][2]
 
+def get_exercise_language(conn, q_id):
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM QUESTION")
+    records = cur.fetchall()
+
+    return records[q_id][1]
+
 def get_max_id(conn):
     cur = conn.cursor()
     cur.execute("SELECT MAX(ID) FROM QUESTION")
