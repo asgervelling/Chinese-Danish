@@ -5,7 +5,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Hello Bulma!</title>
+
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.0/css/bulma.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/tooltip.css">
   </head>
   <body>
 
@@ -52,6 +54,12 @@
         <!-- Hero content: will be in the middle -->
         <div class="hero-body">
           <div class="container has-text-centered"> 
+
+            <!-- Test tooltips -->            
+            <div class="tooltip">Hover over me
+              <span class="tooltiptext">Tooltip text</span>
+            </div> 
+
             {% block content %}
             {% endblock %}
           </div>

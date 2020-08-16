@@ -9,11 +9,16 @@ import os
 
 app = Flask(__name__)
 app.secret_key = 'this_is_secret'
+app.static_folder = 'static'
 
 @app.route('/')
 def index():    
     return render_template('index.html')
 
+@app.route('/reset_session')
+def reset_session():
+    session['completed_exercises'] = []
+    return redirect(url_for('show_exercise', question_id=0))
 
 @app.route('/exercises/<int:question_id>', methods=['GET', 'POST'])
 def show_exercise(question_id):
@@ -98,15 +103,7 @@ def show_exercise(question_id):
         else:
             return redirect(url_for('show_exercise', question_id=question_id))
     return render_template('level.html', form=form, question=question)
-    
-@app.route('/reset_session')
-def reset_session():
-    session['completed_exercises'] = []
-    return redirect(url_for('show_exercise', question_id=0))
 
-@app.errorhandler(404)
-def not_found(error):
-    return render_template('HTML_error.html'), 404
 
 @app.route('/app', methods=['GET','POST'])
 def app_page():
