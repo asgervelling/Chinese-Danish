@@ -27,10 +27,6 @@ def test_demo():
 
 @app.route('/exercises/<int:question_id>', methods=['GET', 'POST'])
 def show_exercise(question_id):
-    # Session
-    s = session['completed_exercises']
-    print(s)
-
     form = BasicForm()
     multiple_choice_form = MultipleChoiceForm()
     conn = sqlite.create_connection('test.db')
@@ -144,14 +140,11 @@ def show_exercise(question_id):
     if ex_type == 'ENTER_THE_ANSWER' and request.method == 'GET':
         print(question)
         if (ex_lang == 'DA-ZH'): 
-            # flip them
-            question_html = get_DA_ZH_html(question)
-            print('The danish question:::::::')
-            print(question_html)
-            
-            
+            question_html = question
+
         if (ex_lang == 'ZH-DA'):
             question_html = get_ZH_DA_html(question)
+            
             
         return render_template('level.html', question_html=question_html,
                                              form=form)
@@ -202,7 +195,7 @@ def show_exercise(question_id):
             return redirect(url_for('show_exercise', question_id=question_id))
 
 
-    print('Question ID: ', question_id)
+    
     return render_template('level.html', form=form, question_html=question_html)
 
 
