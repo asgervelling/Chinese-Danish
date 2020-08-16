@@ -16,6 +16,13 @@ app.static_folder = 'static'
 def index():    
     return render_template('index.html')
 
+@app.route('/select_language/<language>')
+def select_language(language):
+    session['client_language'] = language
+    if session['client_language'] == 'ZH-DA':
+        return redirect('/exercises/0')
+    return redirect('/exercises/2')
+
 @app.route('/reset_session')
 def reset_session():
     session['completed_exercises'] = []
@@ -33,6 +40,14 @@ def show_exercise(question_id):
     answer = form.basic_input.data
             
     question = sqlite.get_question_text(conn, question_id)
+
+    if 'completed_exercises' in session:
+        compl_ex_list = session['completed_exercises']
+        if not question_id in compl_ex_list:
+            compl_ex_list.append(question_id)
+            session['completed_exercises'] = compl_ex_list
+    else:
+        session['completed_exercises'] = []
 
     def get_DA_ZH_html(string:str):
         ''' Use for strings like "Han ser meget [电视]" '''
@@ -57,13 +72,9 @@ def show_exercise(question_id):
             if pinyin_mode == False:
                 danish += char
 
-        print("CHINESE INSERT INDEX: ", chinese_insert_index)
         danish_a = danish[:chinese_insert_index]
         danish_b = danish[chinese_insert_index:]
-        print("DANISH B\n\n:")
-        print(danish_b)
         html = danish_a + chinese + danish_b
-        print(html)
         return(html)
 
     def get_ZH_DA_html(string:str):
@@ -94,13 +105,11 @@ def show_exercise(question_id):
         chinese_a = chinese[:danish_insert_index]
         chinese_b = chinese[danish_insert_index:]
         question_html = chinese_a + danish + chinese_b
-        print(question_html)
         return question_html
         
 
     # Question, exercise type, language and answers
     ex_lang = sqlite.get_exercise_language(conn, question_id)
-    print(ex_lang)
     question_html = ''
     if (ex_lang == 'DA-ZH'): 
         question_html = get_ZH_DA_html(question)
@@ -116,9 +125,7 @@ def show_exercise(question_id):
     # go to a random exercise if you get this one right
     next_exercise_id = 0
     while(next_exercise_id == question_id or next_exercise_id in session['completed_exercises']):
-        next_exercise_id = random.randint(0, sqlite.get_max_id(conn))
-        print('Got a new random number: ', next_exercise_id)
-    
+        next_exercise_id = random.randint(0, sqlite.get_max_id(conn))  
 
     def completed_all_exercises():
         if sqlite.get_max_id(conn) == len(session['completed_exercises']):
@@ -135,7 +142,6 @@ def show_exercise(question_id):
                                                        multiple_choice_form=multiple_choice_form)
 
     if ex_type == 'ENTER_THE_ANSWER' and request.method == 'GET':
-        print(question)
         if (ex_lang == 'DA-ZH'): 
             question_html = question
 
