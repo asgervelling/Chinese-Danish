@@ -59,7 +59,9 @@ def show_exercise(question_id):
 
         print("CHINESE INSERT INDEX: ", chinese_insert_index)
         danish_a = danish[:chinese_insert_index]
-        dainsh_b = danish[chinese_insert_index:]
+        danish_b = danish[chinese_insert_index:]
+        print("DANISH B\n\n:")
+        print(danish_b)
         html = danish_a + chinese + danish_b
         print(html)
         return(html)
@@ -102,14 +104,9 @@ def show_exercise(question_id):
     question_html = ''
     if (ex_lang == 'DA-ZH'): 
         question_html = get_ZH_DA_html(question)
-        print('ZH-DA:')
-        print(question_html)
 
     if (ex_lang == 'ZH-DA'):
         question_html = get_DA_ZH_html(question)
-        print('DA-ZH:')
-        print(question_html)
-
     
     
 
