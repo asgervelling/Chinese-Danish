@@ -113,10 +113,10 @@ def show_exercise(question_id):
     ex_lang = sqlite.get_exercise_language(conn, question_id)
     question_html = ''
     if (ex_lang == 'DA-ZH'): 
-        question_html = get_ZH_DA_html(question)
+        question_html = get_DA_ZH_html(question)
 
     if (ex_lang == 'ZH-DA'):
-        question_html = get_DA_ZH_html(question)
+        question_html = get_ZH_DA_html(question)
     
     
 
@@ -144,11 +144,7 @@ def show_exercise(question_id):
                                                        multiple_choice_form=multiple_choice_form)
 
     if ex_type == 'ENTER_THE_ANSWER' and request.method == 'GET':
-        if (ex_lang == 'DA-ZH'): 
-            question_html = question
-
-        if (ex_lang == 'ZH-DA'):
-            question_html = get_ZH_DA_html(question)
+        
             
             
         return render_template('level.html', question_html=question_html,

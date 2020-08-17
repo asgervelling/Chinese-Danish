@@ -130,8 +130,6 @@ def create_exercise_enter_the_answer(conn,
                                      answer_1:str,
                                      answer_2:str,
                                      language:str):
-    
-    
     cur = conn.cursor()
     ID = get_max_id(conn) + 1
 
@@ -143,14 +141,8 @@ def create_exercise_enter_the_answer(conn,
     a_query = 'INSERT INTO ANSWERS (ID, ANSWER_0, ANSWER_1, ANSWER_2, CORRECT_INDEX, POINTS_REWARD) ' \
               'VALUES ({}, "{}", "{}", "{}", -1, 10);'.format(ID, answer_0, answer_1, answer_2)
 
-    print('ID: ', ID)
-    print(q_query)
-    print()
-    print(a_query)
-
     cur.execute(q_query)
     cur.execute(a_query)
-
 
 # Run these functions on startup
 conn = create_connection('test.db')
