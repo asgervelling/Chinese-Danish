@@ -38,7 +38,7 @@ def print_all_questions(conn):
 
 def print_all_answers(conn):
     cur = conn.cursor()
-    cur.execute("SELECT * FROM ANSWERS_old")
+    cur.execute("SELECT * FROM ANSWERS")
 
     records = cur.fetchall()
     print('Total num rows: ', len(records))
@@ -108,7 +108,6 @@ def create_table_if_not_exists(conn, table_name:str, *variables_with_types:tuple
     
     num_items = len(variables_with_types)
     index = 0
-    print('Printing {} with {} items'.format(table_name, num_items))
 
     for variable, datatype in variables_with_types:
         row_string = variable + ' ' + datatype + ' NOT NULL,\n'
@@ -119,17 +118,38 @@ def create_table_if_not_exists(conn, table_name:str, *variables_with_types:tuple
         # remove the last command and new line
         if index >= num_items - 1:
             row_string = row_string[:-2]
-        print('Index: ', index)
         query += row_string
         index += 1
     query += ');'
-    print(query)
 
     cur.execute(query)
     
-def create_question(conn, question:str, answer:str):
-    pass
+def create_exercise_enter_the_answer(conn,
+                                     question:str,
+                                     answer_0:str,
+                                     answer_1:str,
+                                     answer_2:str,
+                                     language:str):
+    
+    
+    cur = conn.cursor()
+    ID = get_max_id(conn) + 1
 
+    # Questions table
+    q_query = 'INSERT INTO QUESTIONS (ID, LANG, EX_TYPE, TXT) ' \
+              'VALUES ({}, "{}", "ENTER_THE_ANSWER", "{}");'.format(ID, language, question)
+
+    # Answers table
+    a_query = 'INSERT INTO ANSWERS (ID, ANSWER_0, ANSWER_1, ANSWER_2, CORRECT_INDEX, POINTS_REWARD) ' \
+              'VALUES ({}, "{}", "{}", "{}", -1, 10);'.format(ID, answer_0, answer_1, answer_2)
+
+    print('ID: ', ID)
+    print(q_query)
+    print()
+    print(a_query)
+
+    cur.execute(q_query)
+    cur.execute(a_query)
 
 
 # Run these functions on startup
@@ -148,5 +168,5 @@ with conn:
                             ('ALTERNATIVE_ANSWER', 'TEXT'),
                             ('CORRECT_INDEX', 'INT'),
                             ('POINTS_REWARD', 'INT'))
-    print_all_answers(conn)
+    
     conn.commit()
