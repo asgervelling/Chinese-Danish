@@ -1,5 +1,5 @@
 from flask import Flask, request, render_template, url_for, redirect, session
-from forms import BasicForm
+from forms import BasicForm, MultipleChoiceForm
 from pinyin import get
 import random
 
@@ -38,6 +38,7 @@ def show_exercise(question_id):
     multiple_choice_form = MultipleChoiceForm()
     conn = sqlite.create_connection('test.db')
     answer = form.basic_input.data
+    print(answer)
             
     question = sqlite.get_question_text(conn, question_id)
 
@@ -128,7 +129,7 @@ def show_exercise(question_id):
         next_exercise_id = random.randint(0, sqlite.get_max_id(conn))  
 
     def completed_all_exercises():
-        if sqlite.get_max_id(conn) == len(session['completed_exercises']):
+        if sqlite.get_max_id(conn) <= len(session['completed_exercises']):
             return 1
         return 0
 
@@ -137,6 +138,7 @@ def show_exercise(question_id):
     # User is presented with a multiple choice question
     if ex_type == 'MULTIPLE_CHOICE' and request.method == 'GET':
         correct_answer = answers[0]
+        sqlite.get_correct_index(conn, question_id)
         multiple_choice_form.choices = answers
         return render_template('multiple_choice.html', question_html=question_html,
                                                        multiple_choice_form=multiple_choice_form)
@@ -157,20 +159,11 @@ def show_exercise(question_id):
     if request.method == 'POST':
         # 'MULTIPLE_CHOICE' exercise
         if ex_type == 'MULTIPLE_CHOICE':
-            correct_answer = answers[0]
+            correct_answer = answers[sqlite.get_correct_index(conn, question_id)]
             button_input = request.form.to_dict()
             
             # Correct answer
             if correct_answer in button_input:
-                # Don't show the same question twice in the same session
-                if 'completed_exercises' in session:
-                    compl_ex_list = session['completed_exercises']
-                    if not question_id in compl_ex_list:
-                        compl_ex_list.append(question_id)
-                        session['completed_exercises'] = compl_ex_list
-                else:
-                    session['completed exercises'] = [question_id]
-
                 if completed_all_exercises():
                     return render_template('no_more_exercises.html', num_exercises=sqlite.get_max_id(conn))
                 return redirect(url_for('show_exercise', question_id=next_exercise_id))
@@ -180,6 +173,7 @@ def show_exercise(question_id):
         
         # 'ENTER_THE_ANSWER' exercise
         text_input = form.basic_input.data
+        text_input = text_input.casefold()
         if text_input in answers:
             # Don't show the same question twice in the same session
             if 'completed_exercises' in session:

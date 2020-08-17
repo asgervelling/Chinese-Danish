@@ -2,33 +2,16 @@
 {% block head_content %}
 {% endblock head_content %}
 {% block content %}
-<!--
-<div class="columns">
-    <div class="column">
-        <h1 class="title">{{ question }}</h1>
+    <!-- Question with text input -->
+    <div class="columns">
+        <div class="column">
+            <form action="" method="post" name="basic_form">
+                <h1 class="title">
+                {{ question_html | safe }}<br>
+                {{ form.basic_input(size=80, autocomplete="off") }}<br>
+                </h1>
+                <p><input type="submit" value="Ok"></p>
+            </form>
+        </div>
     </div>
-</div>
-<div class="columns">
-    <div class="column">
-        <form action="{{ next_level }}" method="post">
-            <input class="input" type="text" name="answer">
-            <input type="submit" value="Submit">
-        </form>
-        
-    </div>
-    
-</div>
--->
-<div class="columns">
-    <div class="column">
-        <form action="" method="post" name="basic_form">
-            <h1 class="title">
-            {{ question_html | safe }}<br>
-            {{ form.basic_input(size=80, autocomplete="off") }}<br>
-            </h1>
-            <p><input type="submit" value="Ok"></p>
-        </form>
-    </div>
-</div>
-
 {% endblock %}
