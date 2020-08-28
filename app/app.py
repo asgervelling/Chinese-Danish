@@ -1,10 +1,11 @@
 from flask import Flask, request, render_template, url_for, redirect, session
-from forms import BasicForm, MultipleChoiceForm
+from forms import *
 from pinyin import get
 import random
 
 import sqlite
 from forms import *
+from helpers import *
 
 import os
 
@@ -20,8 +21,8 @@ def index():
 def select_language(language):
     session['client_language'] = language
     if session['client_language'] == 'ZH-DA':
-        return redirect('/exercises/0')
-    return redirect('/exercises/2')
+        return redirect('/exercises/0') # written in Chinese
+    return redirect('/exercises/2') # written in Danish
 
 @app.route('/reset_session')
 def reset_session():
@@ -32,13 +33,57 @@ def reset_session():
 def test_demo():
     return render_template('testing.html')
 
+@app.route('/add_exercise/<int:type_of_exercise>', methods=['GET', 'POST'])
+def add_exercise(type_of_exercise):
+    add_exercise_form_0 = AddExerciseFormEnterTheAnswer()
+    add_exercise_form_1 = AddExerciseFormMultipleChoice()
+    print(type_of_exercise)
+    if request.method == 'POST':
+        q = ''
+        a0 = ''
+        a1 = ''
+        a2 = ''
+        lang = ''
+        correct_index = 0
+        if type_of_exercise == 0:
+            exercise_0_data = request.form.to_dict()
+            q = exercise_0_data['question']
+            a0 = exercise_0_data['answer_0']
+            a1 = exercise_0_data['answer_1']
+            a2 = exercise_0_data['answer_2']
+            lang = exercise_0_data['lang']
+            correct_index = -1
+
+        if type_of_exercise == 1:
+            exercise_1_data = request.form.to_dict()
+            q = exercise_1_data['question']
+            a0 = exercise_1_data['answer_0']
+            a1 = exercise_1_data['answer_1']
+            a2 = exercise_1_data['answer_2']
+            lang = exercise_1_data['lang']
+            correct_index = exercise_1_data['correct_index']
+
+        # This doesn't work
+        if any_is_empty(q, a0, a1, a2, lang):
+            return render_template('add_exercise.html', add_exercise_form_0=add_exercise_form_0,
+                                                        add_exercise_form_1=add_exercise_form_1)
+
+        # Create a new DB connection and close it after use
+        conn = sqlite.create_connection('test.db')
+        with conn:
+            sqlite.create_exercise_enter_the_answer(conn, q, a0, a1, a2, lang)
+            conn.commit()
+    else:
+        print('get')
+    return render_template('add_exercise.html', add_exercise_form_0=add_exercise_form_0,
+                                                add_exercise_form_1=add_exercise_form_1)
+
 @app.route('/exercises/<int:question_id>', methods=['GET', 'POST'])
 def show_exercise(question_id):
     form = BasicForm()
     multiple_choice_form = MultipleChoiceForm()
     conn = sqlite.create_connection('test.db')
     answer = form.basic_input.data
-    print(answer)
             
     question = sqlite.get_question_text(conn, question_id)
 
@@ -50,6 +95,9 @@ def show_exercise(question_id):
     else:
         session['completed_exercises'] = []
 
+
+    ''' If an exercise is of language "ZH-DA", it means that most of the
+        question is written in chinese, and vice verca.              '''
     def get_DA_ZH_html(string:str):
         ''' Use for strings like "Han ser meget [电视]" '''
         pinyin_mode = False
@@ -117,9 +165,6 @@ def show_exercise(question_id):
 
     if (ex_lang == 'ZH-DA'):
         question_html = get_ZH_DA_html(question)
-    
-    
-
     ex_type = sqlite.get_exercise_type(conn, question_id)
     answers = [sqlite.get_answer(conn, question_id, i).casefold() for i in range(1, 4)]
 
@@ -170,6 +215,7 @@ def show_exercise(question_id):
         # 'ENTER_THE_ANSWER' exercise
         text_input = form.basic_input.data
         text_input = text_input.casefold()
+        text_input = text_input.strip()
         if text_input in answers:
             # Don't show the same question twice in the same session
             if 'completed_exercises' in session:

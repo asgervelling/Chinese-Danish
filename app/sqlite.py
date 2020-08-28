@@ -68,7 +68,7 @@ def get_answer(conn, q_id, a_id):
     cur.execute("SELECT * FROM ANSWERS")
     records = cur.fetchall()
 
-    return records[q_id][a_id].casefold() ## get more answers, if any
+    return records[q_id][a_id]
 
 def get_correct_index(conn, q_id):
     cur = conn.cursor()
@@ -76,7 +76,6 @@ def get_correct_index(conn, q_id):
     cur.execute(query)
     index = cur.fetchone()[4]
 
-    print('Correct answer index: ', index)
     return index
 
 def get_exercise_type(conn, q_id):
