@@ -6,3 +6,20 @@ class BasicForm(FlaskForm):
 
 class MultipleChoiceForm(FlaskForm):
     answers = SelectField('multiple_choice')
+
+class AddExerciseFormEnterTheAnswer(FlaskForm):
+    question = StringField('question input')
+    lang = StringField('lang input')
+    answer_0 = StringField('answer_0')
+    answer_1 = StringField('answer_1')
+    answer_2 = StringField('answer_2')
+    ex_type = StringField('ex_type')
+
+class AddExerciseFormMultipleChoice(FlaskForm):
+    question = StringField('question input')
+    lang = StringField('lang input')
+    answer_0 = StringField('answer_0')
+    answer_1 = StringField('answer_1')
+    answer_2 = StringField('answer_2')
+    ex_type = StringField('ex_type')
+    correct_index = StringField('correct_index')

@@ -33,57 +33,19 @@ def reset_session():
 def test_demo():
     return render_template('testing.html')
 
-@app.route('/add_exercise/<int:type_of_exercise>', methods=['GET', 'POST'])
-def add_exercise(type_of_exercise):
-    add_exercise_form_0 = AddExerciseFormEnterTheAnswer()
-    add_exercise_form_1 = AddExerciseFormMultipleChoice()
-    print(type_of_exercise)
-    if request.method == 'POST':
-        q = ''
-        a0 = ''
-        a1 = ''
-        a2 = ''
-        lang = ''
-        correct_index = 0
-        if type_of_exercise == 0:
-            exercise_0_data = request.form.to_dict()
-            q = exercise_0_data['question']
-            a0 = exercise_0_data['answer_0']
-            a1 = exercise_0_data['answer_1']
-            a2 = exercise_0_data['answer_2']
-            lang = exercise_0_data['lang']
-            correct_index = -1
+@app.route('/add_enter_the_answer', methods=['GET', 'POST'])
+def add_enter_the_answer():
+    return render_template('add_exercise_enter_the_answer.html')
 
-        if type_of_exercise == 1:
-            exercise_1_data = request.form.to_dict()
-            q = exercise_1_data['question']
-            a0 = exercise_1_data['answer_0']
-            a1 = exercise_1_data['answer_1']
-            a2 = exercise_1_data['answer_2']
-            lang = exercise_1_data['lang']
-            correct_index = exercise_1_data['correct_index']
-
-        # This doesn't work
-        if any_is_empty(q, a0, a1, a2, lang):
-            return render_template('add_exercise.html', add_exercise_form_0=add_exercise_form_0,
-                                                        add_exercise_form_1=add_exercise_form_1)
-
-        # Create a new DB connection and close it after use
-        conn = sqlite.create_connection('test.db')
-        with conn:
-            sqlite.create_exercise_enter_the_answer(conn, q, a0, a1, a2, lang)
-            conn.commit()
-    else:
-        print('get')
-    return render_template('add_exercise.html', add_exercise_form_0=add_exercise_form_0,
-                                                add_exercise_form_1=add_exercise_form_1)
+@app.route('/add_multiple_choice', methods=['GET', 'POST'])
+def add_multiple_choice():
+    return render_template('add_exercise_multiple_choice.html')
 
 @app.route('/exercises/<int:question_id>', methods=['GET', 'POST'])
 def show_exercise(question_id):
     form = BasicForm()
     multiple_choice_form = MultipleChoiceForm()
     conn = sqlite.create_connection('test.db')
-    answer = form.basic_input.data
             
     question = sqlite.get_question_text(conn, question_id)
 
@@ -214,8 +176,8 @@ def show_exercise(question_id):
         
         # 'ENTER_THE_ANSWER' exercise
         text_input = form.basic_input.data
-        text_input = text_input.casefold()
-        text_input = text_input.strip()
+        text_input = text_input.casefold().strip()
+        
         if text_input in answers:
             # Don't show the same question twice in the same session
             if 'completed_exercises' in session:
