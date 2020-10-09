@@ -35,10 +35,26 @@ def test_demo():
 
 @app.route('/add_enter_the_answer', methods=['GET', 'POST'])
 def add_enter_the_answer():
+    if request.method == 'POST':
+        # Admin submitted an exercise
+        question_txt = request.form['question']
+        lang = request.form['lang']
+        answer = request.form['answer']
+        sqlite.create_exercise_enter_the_answer(question_txt, answer, lang)
     return render_template('add_exercise_enter_the_answer.html')
 
 @app.route('/add_multiple_choice', methods=['GET', 'POST'])
 def add_multiple_choice():
+    if request.method == 'POST':
+        # Admin submitted an exercise
+        question_txt = request.form['question']
+        lang = request.form['lang']
+        ans_0 = request.form['answer_0']
+        ans_1 = request.form['answer_1']
+        ans_2 = request.form['answer_2']
+        correct_index = request.form['correct_index']
+        sqlite.create_exercise_multiple_choice(question_txt, lang, ans_0, ans_1, ans_2, correct_index)
+
     return render_template('add_exercise_multiple_choice.html')
 
 @app.route('/exercises/<int:question_id>', methods=['GET', 'POST'])

@@ -5,49 +5,71 @@
 <form action="#" method="post">
     <div class="columns">
         <div class="column">
-            <h1 class="has-text-weight-bold">'Enter the Answer'-exercise</h1>
+            <h1 class="has-text-weight-bold">Multiple choice-exercise</h1>
         </div>
     </div>
+
     <div class="columns">
         <div class="column">
             Question
         </div>
         <div class="column">
-            <input type="text" id="question">
+            <input type="text" name="question">
         </div>
     </div>
+    
     <div class="columns">
         <div class="column">
             Language
         </div>
         <div class="column">
-            <select name="cars" id="cars">
+            <select name="lang">
                 <option value="ZH-DA">Mostly Chinese</option>
                 <option value="DA-ZH">Mostly Danish</option>
             </select>
         </div>
     </div>
+    
+    
     <div class="container">
         <div class="columns">
             <div class="column">
-                Correct answer
+                Choices
             </div>
             <div class="column">
-                <input type="text" id="answer_0">
+                <input type="text" name="answer_0">
             </div>
         </div>
+
+        <div class="columns">
+            <div class="column">
+            </div>
+            <div class="column">
+                <input type="text" name="answer_1">
+            </div>
+        </div>
+        
+        <div class="columns">
+            <div class="column">
+            </div>
+            <div class="column">
+                <input type="text" name="answer_2">
+            </div>
+        </div>
+
         <div class="columns">
             <div class="column">
                 Correct answer index
             </div>
             <div class="column">
-                <select name="cars" id="cars">
+                <select name="correct_index">
                     <option value="0">0</option>
                     <option value="1">1</option>
                     <option value="2">2</option>
                 </select>
             </div>
         </div>
+
         <div class="columns">
             <div class="column">
             </div>

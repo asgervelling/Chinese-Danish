@@ -1,4 +1,6 @@
 import sqlite3
+import string
+import random
 
 def create_connection(db_file):
     """ create a database connection to the SQLite database
@@ -115,12 +117,14 @@ def create_table_if_not_exists(conn, table_name:str, *variables_with_types:tuple
 
     cur.execute(query)
     
-def create_exercise_enter_the_answer(conn,
-                                     question:str,
-                                     answer_0:str,
-                                     answer_1:str,
-                                     answer_2:str,
+def random_word(length):
+    letters = string.ascii_lowercase
+    return ''.join(random.choice(letters) for i in range(length))
+
+def create_exercise_enter_the_answer(question:str,
+                                     answer:str,
                                      language:str):
+    conn = create_connection('test.db')
     cur = conn.cursor()
     ID = get_max_id(conn) + 1
 
@@ -130,26 +134,37 @@ def create_exercise_enter_the_answer(conn,
 
     # Answers table
     a_query = 'INSERT INTO ANSWERS (ID, ANSWER_0, ANSWER_1, ANSWER_2, CORRECT_INDEX, POINTS_REWARD) ' \
-              'VALUES ({}, "{}", "{}", "{}", -1, 10);'.format(ID, answer_0, answer_1, answer_2)
+              'VALUES ({}, "{}", "{}", "{}", -1, 10);'.format(ID, answer, random_word(16), random_word(16))
 
     cur.execute(q_query)
-    cur.execute(a_query)
-
-# Run these functions on startup
-conn = create_connection('test.db')
-with conn:
-    create_table_if_not_exists(conn,
-                            'QUESTIONS',
-                            ('ID', 'INT'),
-                            ('LANG', 'TEXT'),
-                            ('EX_TYPE', 'TEXT'),
-                            ('TXT', 'TEXT'))
-    create_table_if_not_exists(conn,
-                            'ANSWERS',
-                            ('ID', 'INT'),
-                            ('ANSWER', 'TEXT'),
-                            ('ALTERNATIVE_ANSWER', 'TEXT'),
-                            ('CORRECT_INDEX', 'INT'),
-                            ('POINTS_REWARD', 'INT'))
-    
     conn.commit()
+
+    cur.execute(a_query)
+    conn.commit()
+
+    conn.close()
+
+def create_exercise_multiple_choice(question:str,
+                                    language:str,
+                                    answer_0:str,
+                                    answer_1:str,
+                                    answer_2:str,
+                                    correct_index:int):
+    conn = create_connection('test.db')
+    cur = conn.cursor()
+    ID = get_max_id(conn) + 1
+
+    q_query = 'INSERT INTO QUESTIONS (ID, LANG, EX_TYPE, TXT) ' \
+              'VALUES ({}, "{}", "MULTIPLE_CHOICE", "{}");'.format(ID, language, question)
+    
+    a_query = 'INSERT INTO ANSWERS (ID, ANSWER_0, ANSWER_1, ANSWER_2, CORRECT_INDEX, POINTS_REWARD) ' \
+              'VALUES ({}, "{}", "{}", "{}", {}, 10);' \
+              .format(ID, answer_0, answer_1, answer_2, correct_index)
+
+    cur.execute(q_query)
+    conn.commit()
+
+    cur.execute(a_query) # ACID???
+    conn.commit()
+
+    conn.close()
