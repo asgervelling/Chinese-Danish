@@ -61,9 +61,8 @@ def add_multiple_choice():
 def show_exercise(question_id):
     form = BasicForm()
     multiple_choice_form = MultipleChoiceForm()
-    conn = sqlite.create_connection('test.db')
             
-    question = sqlite.get_question_text(conn, question_id)
+    question = sqlite.get_question_text(question_id)
 
     if 'completed_exercises' in session:
         compl_ex_list = session['completed_exercises']
@@ -136,23 +135,23 @@ def show_exercise(question_id):
         
 
     # Question, exercise type, language and answers
-    ex_lang = sqlite.get_exercise_language(conn, question_id)
+    ex_lang = sqlite.get_exercise_language(question_id)
     question_html = ''
     if (ex_lang == 'DA-ZH'): 
         question_html = get_DA_ZH_html(question)
 
     if (ex_lang == 'ZH-DA'):
         question_html = get_ZH_DA_html(question)
-    ex_type = sqlite.get_exercise_type(conn, question_id)
-    answers = [sqlite.get_answer(conn, question_id, i).casefold() for i in range(1, 4)]
+    ex_type = sqlite.get_exercise_type(question_id)
+    answers = [sqlite.get_answer(question_id, i).casefold() for i in range(1, 4)]
 
     # go to a random exercise if you get this one right
     next_exercise_id = 0
     while(next_exercise_id == question_id or next_exercise_id in session['completed_exercises']):
-        next_exercise_id = random.randint(0, sqlite.get_max_id(conn))  
+        next_exercise_id = random.randint(0, sqlite.get_max_id())  
 
     def completed_all_exercises():
-        if sqlite.get_max_id(conn) <= len(session['completed_exercises']):
+        if sqlite.get_max_id() <= len(session['completed_exercises']):
             return 1
         return 0
 
@@ -161,7 +160,7 @@ def show_exercise(question_id):
     # User is presented with a multiple choice question
     if ex_type == 'MULTIPLE_CHOICE' and request.method == 'GET':
         correct_answer = answers[0]
-        sqlite.get_correct_index(conn, question_id)
+        sqlite.get_correct_index(question_id)
         multiple_choice_form.choices = answers
         return render_template('multiple_choice.html', question_html=question_html,
                                                        multiple_choice_form=multiple_choice_form)
@@ -175,13 +174,13 @@ def show_exercise(question_id):
     if request.method == 'POST':
         # 'MULTIPLE_CHOICE' exercise
         if ex_type == 'MULTIPLE_CHOICE':
-            correct_answer = answers[sqlite.get_correct_index(conn, question_id)]
+            correct_answer = answers[sqlite.get_correct_index(question_id)]
             button_input = request.form.to_dict()
             
             # Correct answer
             if correct_answer in button_input:
                 if completed_all_exercises():
-                    return render_template('no_more_exercises.html', num_exercises=sqlite.get_max_id(conn))
+                    return render_template('no_more_exercises.html', num_exercises=sqlite.get_max_id())
                 return redirect(url_for('show_exercise', question_id=next_exercise_id))
             # Wrong answer
             else:
@@ -202,7 +201,7 @@ def show_exercise(question_id):
                 session['completed exercises'] = [question_id]
             
             if completed_all_exercises():
-                return render_template('no_more_exercises.html', num_exercises=sqlite.get_max_id(conn))
+                return render_template('no_more_exercises.html', num_exercises=sqlite.get_max_id())
             return redirect(url_for('show_exercise', question_id=next_exercise_id))
     
         else:
