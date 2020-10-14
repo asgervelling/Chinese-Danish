@@ -47,15 +47,6 @@ def print_all_answers():
         print('Answer 2\t\t\t\t', row[3])
 
     conn.close()
-
-def get_question_records():
-    conn = create_connection('test.db')
-    cur = conn.cursor()
-    cur.execute("SELECT * FROM QUESTIONS")
-    records = cur.fetchall()
-    conn.close()
-
-    return records
    
 def get_question_text(id):
     conn = create_connection('test.db')
@@ -67,6 +58,7 @@ def get_question_text(id):
     return records[id][3]
 
 def get_answer(q_id, a_id):
+    # This one needs a little work
     conn = create_connection('test.db')
     cur = conn.cursor()
     cur.execute("SELECT * FROM ANSWERS")
@@ -78,8 +70,9 @@ def get_answer(q_id, a_id):
 def get_correct_index(q_id):
     conn = create_connection('test.db')
     cur = conn.cursor()
-    query = "SELECT * FROM ANSWERS WHERE ID = {}".format(q_id)
-    cur.execute(query)
+    # When you put the variable in a tuple with trailing commas,
+    # SQLite3 escapes dangerous characters
+    cur.execute("SELECT * FROM ANSWERS WHERE ID = ?", (q_id,))
     index = cur.fetchone()[4]
     conn.close()
 
@@ -114,30 +107,6 @@ def get_max_id():
     conn.close()
 
     return max_id
-
-def create_table_if_not_exists(table_name:str, *variables_with_types:tuple):
-    conn = create_connection('test.db')
-    cur = conn.cursor()
-    query = "CREATE TABLE IF NOT EXISTS {}\n(".format(table_name)
-    
-    num_items = len(variables_with_types)
-    index = 0
-
-    for variable, datatype in variables_with_types:
-        row_string = variable + ' ' + datatype + ' NOT NULL,\n'
-        # Make IDs unique
-        if variable in ['ID', 'Id', 'iD', 'id']:
-            row_string = variable + ' ' + datatype + ' PRIMARY KEY NOT NULL,\n'
-        
-        # remove the last command and new line
-        if index >= num_items - 1:
-            row_string = row_string[:-2]
-        query += row_string
-        index += 1
-    query += ');'
-
-    cur.execute(query)
-    conn.close()
 
 def create_exercise_enter_the_answer(question:str,
                                      answer:str,

@@ -35,6 +35,7 @@ def test_demo():
 
 @app.route('/add_enter_the_answer', methods=['GET', 'POST'])
 def add_enter_the_answer():
+    ''' Admin page. Add an exercise to the DB, the type where you enter the answer in a text field '''
     if request.method == 'POST':
         # Admin submitted an exercise
         question_txt = request.form['question']
@@ -45,6 +46,7 @@ def add_enter_the_answer():
 
 @app.route('/add_multiple_choice', methods=['GET', 'POST'])
 def add_multiple_choice():
+    ''' Admin page. Add an exercise to the DB, multiple choice-type '''
     if request.method == 'POST':
         # Admin submitted an exercise
         question_txt = request.form['question']
@@ -59,6 +61,8 @@ def add_multiple_choice():
 
 @app.route('/exercises/<int:question_id>', methods=['GET', 'POST'])
 def show_exercise(question_id):
+    ''' Read an exercise/question from the database on get requests.
+        Check user's answer on post requests. '''
     form = BasicForm()
     multiple_choice_form = MultipleChoiceForm()
             
@@ -104,7 +108,7 @@ def show_exercise(question_id):
         return(html)
 
     def get_ZH_DA_html(string:str):
-        ''' Use for strings like 我听不[forstå] '''
+        ''' Use for strings like 我听不[forstå]你的说 '''
         pinyin_mode = True
         chinese = ''
         chinese_a = ''
